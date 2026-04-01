@@ -4,15 +4,11 @@
 
 ## Dependency Layout
 
-This package expects a sibling checkout of `swift-lispkit`:
+`Package.swift` resolves the public `swift-lispkit` fork from:
 
-```text
-Packages/
-  LispPadCore/
-  swift-lispkit/
-```
+- `https://github.com/SinanKarasu/swift-lispkit.git`
 
-`Package.swift` resolves LispKit via `../swift-lispkit`.
+The package currently tracks the fork's `master` branch.
 
 ## Platforms
 
