@@ -8,7 +8,7 @@
 
 - `https://github.com/SinanKarasu/swift-lispkit.git`
 
-The package currently tracks the fork's `codex/lisppad-ios-portability` branch.
+The package is currently pinned to the published iOS/visionOS portability revision of that fork.
 
 ## Platforms
 

@@ -16,7 +16,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/SinanKarasu/swift-lispkit.git", branch: "codex/lisppad-ios-portability")
+        .package(url: "https://github.com/SinanKarasu/swift-lispkit.git", revision: "c94b34f77d443f6e93d244690e69d140c22d3366")
     ],
     targets: [
         .target(
