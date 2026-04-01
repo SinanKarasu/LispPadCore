@@ -8,7 +8,7 @@
 
 - `https://github.com/SinanKarasu/swift-lispkit.git`
 
-The package currently tracks the fork's `master` branch.
+The package currently tracks the fork's `codex/lisppad-ios-portability` branch.
 
 ## Platforms
 
