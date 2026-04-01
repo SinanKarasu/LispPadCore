@@ -60,6 +60,12 @@ public final class LibraryManager: ObservableObject, @unchecked Sendable {
     }
 
     func add(proxy: LibraryProxy) {
+        doOnMainThread {
+            self.addOnMain(proxy: proxy)
+        }
+    }
+
+    private func addOnMain(proxy: LibraryProxy) {
         let name = proxy.name
         var low = 0
         var high = self.libraries.count - 1
@@ -80,7 +86,9 @@ public final class LibraryManager: ObservableObject, @unchecked Sendable {
     }
 
     func updatedLibraries() -> [LibraryProxy] {
-        var updated = self.libraries.filter(\.isLoaded)
+        var updated = doOnMainThread {
+            self.libraries.filter(\.isLoaded)
+        }
 
         func addIfNew(_ scanned: String) {
             let proxy = LibraryProxy(scanned: "(" + scanned + ")")
@@ -121,7 +129,10 @@ public final class LibraryManager: ObservableObject, @unchecked Sendable {
     }
 
     public func updateLibraries() {
-        self.libraries = self.updatedLibraries()
+        let updatedLibraries = self.updatedLibraries()
+        doOnMainThread {
+            self.libraries = updatedLibraries
+        }
     }
 
     func replaceLoadedLibraries(with libraries: [Library]) {
@@ -130,7 +141,7 @@ public final class LibraryManager: ObservableObject, @unchecked Sendable {
             .sorted { left, right in
                 left.name.localizedStandardCompare(right.name) == .orderedAscending
             }
-        DispatchQueue.main.sync {
+        doOnMainThread {
             self.libraries = updated
         }
     }
@@ -171,7 +182,9 @@ public final class LibraryManager: ObservableObject, @unchecked Sendable {
     }
 
     func reset() {
-        self.fileHandler = nil
-        self.libraries.removeAll()
+        doOnMainThread {
+            self.fileHandler = nil
+            self.libraries.removeAll()
+        }
     }
 }

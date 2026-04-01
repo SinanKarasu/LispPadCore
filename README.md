@@ -22,5 +22,9 @@ Packages/
 
 ## License
 
-This package is distributed under GPLv3.
+This package is distributed under the Apache License, Version 2.0.
 
+`LispPadCore` is intended to remain independently reusable outside the
+`LispPadDev` app bundle. When it is combined with GPL-covered components in
+`LispPadDev`, the resulting app distribution follows the app's GPLv3 terms,
+but this standalone package remains Apache-2.0.

@@ -11,6 +11,12 @@ public final class Console: ObservableObject, CustomStringConvertible {
     }
 
     public func append(output: ConsoleOutput) {
+        doOnMainThread {
+            self.appendOnMain(output: output)
+        }
+    }
+
+    private func appendOnMain(output: ConsoleOutput) {
         let max = UserSettings.standard.maxConsoleHistory
         while self.content.count >= (max + 50) {
             self.content.removeFirst(self.content.count - max)
@@ -24,34 +30,40 @@ public final class Console: ObservableObject, CustomStringConvertible {
     }
 
     public func print(_ string: String) {
-        if self.content.isEmpty {
-            self.append(output: .output(string))
-        } else if let last = self.content.last, last.kind == .output {
-            if last.text.count < 1000 {
-                self.content[self.content.count - 1].text += string
-            } else if string.first == "\n" {
-                self.append(output: .output(String(string.dropFirst())))
-            } else if last.text.last == "\n" {
-                let text = String(self.content[self.content.count - 1].text.dropLast())
-                self.content[self.content.count - 1].text = text
-                self.append(output: .output(string))
+        doOnMainThread {
+            if self.content.isEmpty {
+                self.appendOnMain(output: .output(string))
+            } else if let last = self.content.last, last.kind == .output {
+                if last.text.count < 1000 {
+                    self.content[self.content.count - 1].text += string
+                } else if string.first == "\n" {
+                    self.appendOnMain(output: .output(String(string.dropFirst())))
+                } else if last.text.last == "\n" {
+                    let text = String(self.content[self.content.count - 1].text.dropLast())
+                    self.content[self.content.count - 1].text = text
+                    self.appendOnMain(output: .output(string))
+                } else {
+                    self.appendOnMain(output: .output(string))
+                }
             } else {
-                self.append(output: .output(string))
+                self.appendOnMain(output: .output(string))
             }
-        } else {
-            self.append(output: .output(string))
         }
     }
 
     public func removeLast() {
-        guard !self.content.isEmpty else {
-            return
+        doOnMainThread {
+            guard !self.content.isEmpty else {
+                return
+            }
+            self.content.removeLast()
         }
-        self.content.removeLast()
     }
 
     public func reset() {
-        self.content.removeAll()
+        doOnMainThread {
+            self.content.removeAll()
+        }
     }
 
     public var lastOutputID: UUID? {

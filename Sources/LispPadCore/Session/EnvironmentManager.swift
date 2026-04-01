@@ -21,7 +21,7 @@ public final class EnvironmentManager: ObservableObject, @unchecked Sendable {
     }
 
     func add(identifier: String) {
-        DispatchQueue.main.async {
+        doOnMainThreadAsync {
             if Self.insert(identifier: identifier, into: &self.bindingNamesStorage) {
                 self.bindingCountStorage += 1
             }
@@ -30,7 +30,7 @@ public final class EnvironmentManager: ObservableObject, @unchecked Sendable {
 
     func replaceBindings(with identifiers: [String]) {
         let uniqueSorted = Array(Set(identifiers)).sorted()
-        DispatchQueue.main.sync {
+        doOnMainThread {
             self.bindingNamesStorage = uniqueSorted
             self.bindingCountStorage = uniqueSorted.count
         }
@@ -56,7 +56,7 @@ public final class EnvironmentManager: ObservableObject, @unchecked Sendable {
     }
 
     func reset() {
-        DispatchQueue.main.sync {
+        doOnMainThread {
             self.bindingNamesStorage.removeAll()
             self.bindingCountStorage = 0
         }

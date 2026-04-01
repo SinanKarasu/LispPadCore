@@ -7,7 +7,7 @@
 
 import Foundation
 
-func doOnMainThread<T>(proc: @Sendable () -> T) -> T {
+func doOnMainThread<T>(proc: () -> T) -> T {
   if Thread.isMainThread {
     return proc()
   } else {
@@ -15,10 +15,10 @@ func doOnMainThread<T>(proc: @Sendable () -> T) -> T {
   }
 }
 
-func doOnMainThreadAsync(proc: @escaping @Sendable () -> Void) {
+func doOnMainThreadAsync(proc: @escaping () -> Void) {
   if Thread.isMainThread {
     proc()
   } else {
-    DispatchQueue.main.async(execute: proc)
+    OperationQueue.main.addOperation(BlockOperation(block: proc))
   }
 }

@@ -90,7 +90,7 @@ public final class Interpreter: ObservableObject, ContextDelegate, @unchecked Se
             return
         }
 
-        DispatchQueue.main.async {
+        doOnMainThreadAsync {
             self.console.append(output: .command(trimmed))
             self.completeContentBatch()
         }
@@ -244,7 +244,7 @@ public final class Interpreter: ObservableObject, ContextDelegate, @unchecked Se
     }
 
     public func clearConsole() {
-        DispatchQueue.main.async {
+        doOnMainThreadAsync {
             self.console.reset()
             self.completeContentBatch()
         }
@@ -255,11 +255,13 @@ public final class Interpreter: ObservableObject, ContextDelegate, @unchecked Se
     }
 
     private func completeContentBatch() {
-        self.contentBatch &+= 1
+        doOnMainThread {
+            self.contentBatch &+= 1
+        }
     }
 
     private func append(result: [ConsoleOutput]) {
-        DispatchQueue.main.sync {
+        doOnMainThread {
             self.isReady = true
             self.readingStatus = .accept
             for output in result {
@@ -285,7 +287,7 @@ public final class Interpreter: ObservableObject, ContextDelegate, @unchecked Se
 
     private func initialize() {
         self.context = nil
-        DispatchQueue.main.sync {
+        doOnMainThread {
             self.isReady = false
             self.readingStatus = .reject
             self.console.reset()
@@ -340,7 +342,7 @@ public final class Interpreter: ObservableObject, ContextDelegate, @unchecked Se
         do {
             try context.bootstrap(forRepl: true)
         } catch {
-            DispatchQueue.main.sync {
+            doOnMainThread {
                 self.console.append(output: .error("Failed to bootstrap LispKit", context: ErrorContext(stackTrace: error.localizedDescription)))
                 self.isReady = true
                 self.readingStatus = .accept
@@ -353,7 +355,7 @@ public final class Interpreter: ObservableObject, ContextDelegate, @unchecked Se
             do {
                 _ = try context.evaluator.machine.eval(file: preludePath)
             } catch let error as RuntimeError {
-                DispatchQueue.main.sync {
+                doOnMainThread {
                     self.console.append(output: .error(self.errorMessage(error, in: context), context: self.errorLocation(error, in: context)))
                     self.isReady = true
                     self.readingStatus = .accept
@@ -361,7 +363,7 @@ public final class Interpreter: ObservableObject, ContextDelegate, @unchecked Se
                 }
                 return
             } catch {
-                DispatchQueue.main.sync {
+                doOnMainThread {
                     self.console.append(output: .error(error.localizedDescription))
                     self.isReady = true
                     self.readingStatus = .accept
@@ -376,7 +378,7 @@ public final class Interpreter: ObservableObject, ContextDelegate, @unchecked Se
         self.context = context
         self.libManager.scheduleLibraryUpdate()
 
-        DispatchQueue.main.sync {
+        doOnMainThread {
             self.console.append(output: .info("LispPadCore session ready"))
             self.console.append(output: .result("Try (+ 2 3), (map (lambda (x) (* x x)) '(1 2 3 4)), or (features)."))
             self.isReady = true
@@ -490,14 +492,14 @@ public final class Interpreter: ObservableObject, ContextDelegate, @unchecked Se
     }
 
     public func print(_ string: String) {
-        DispatchQueue.main.async {
+        doOnMainThreadAsync {
             self.console.print(string)
             self.completeContentBatch()
         }
     }
 
     public func read() -> String? {
-        DispatchQueue.main.sync {
+        doOnMainThread {
             self.readingStatus = .accept
         }
         self.readingCondition.lock()
@@ -509,12 +511,12 @@ public final class Interpreter: ObservableObject, ContextDelegate, @unchecked Se
             self.readingCondition.wait()
         }
         if case .read(let text) = self.readingStatus {
-            DispatchQueue.main.sync {
+            doOnMainThread {
                 self.readingStatus = .reject
             }
             return text + "\n"
         }
-        DispatchQueue.main.sync {
+        doOnMainThread {
             self.readingStatus = .reject
         }
         return nil
@@ -525,7 +527,7 @@ public final class Interpreter: ObservableObject, ContextDelegate, @unchecked Se
             return
         }
         let proxy = self.libManager.proxy(for: lib)
-        DispatchQueue.main.async {
+        doOnMainThreadAsync {
             self.libManager.add(proxy: proxy)
         }
     }
