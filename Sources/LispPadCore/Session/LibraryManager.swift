@@ -124,6 +124,17 @@ public final class LibraryManager: ObservableObject, @unchecked Sendable {
         self.libraries = self.updatedLibraries()
     }
 
+    func replaceLoadedLibraries(with libraries: [Library]) {
+        let updated = libraries
+            .map(LibraryProxy.init(loaded:))
+            .sorted { left, right in
+                left.name.localizedStandardCompare(right.name) == .orderedAscending
+            }
+        DispatchQueue.main.sync {
+            self.libraries = updated
+        }
+    }
+
     private func scanLibraryTrees() -> Set<String> {
         let fileManager = Foundation.FileManager.default
         var result: Set<String> = []

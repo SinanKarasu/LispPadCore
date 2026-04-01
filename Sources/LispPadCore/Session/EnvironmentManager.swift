@@ -3,12 +3,13 @@ import Foundation
 import LispKit
 
 public final class EnvironmentManager: ObservableObject, @unchecked Sendable {
+    @Published private var bindingCountStorage: Int = 0
     @Published private var bindingNamesStorage: [String] = []
 
     public init() {}
 
     public var bindingCount: Int {
-        self.bindingNamesStorage.count
+        self.bindingCountStorage
     }
 
     public var bindingNames: [String] {
@@ -20,10 +21,23 @@ public final class EnvironmentManager: ObservableObject, @unchecked Sendable {
     }
 
     func add(identifier: String) {
-        Self.insert(identifier: identifier, into: &self.bindingNamesStorage)
+        DispatchQueue.main.async {
+            if Self.insert(identifier: identifier, into: &self.bindingNamesStorage) {
+                self.bindingCountStorage += 1
+            }
+        }
     }
 
-    private static func insert(identifier: String, into bindings: inout [String]) {
+    func replaceBindings(with identifiers: [String]) {
+        let uniqueSorted = Array(Set(identifiers)).sorted()
+        DispatchQueue.main.sync {
+            self.bindingNamesStorage = uniqueSorted
+            self.bindingCountStorage = uniqueSorted.count
+        }
+    }
+
+    @discardableResult
+    private static func insert(identifier: String, into bindings: inout [String]) -> Bool {
         var low = 0
         var high = bindings.count - 1
         while low <= high {
@@ -34,14 +48,17 @@ public final class EnvironmentManager: ObservableObject, @unchecked Sendable {
             } else if identifier < current {
                 high = middle - 1
             } else {
-                low = middle
-                break
+                return false
             }
         }
         bindings.insert(identifier, at: low)
+        return true
     }
 
     func reset() {
-        self.bindingNamesStorage.removeAll()
+        DispatchQueue.main.sync {
+            self.bindingNamesStorage.removeAll()
+            self.bindingCountStorage = 0
+        }
     }
 }

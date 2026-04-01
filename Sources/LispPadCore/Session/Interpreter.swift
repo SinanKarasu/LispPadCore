@@ -349,8 +349,6 @@ public final class Interpreter: ObservableObject, ContextDelegate, @unchecked Se
             return
         }
 
-        self.context = context
-
         if let preludePath = context.fileHandler.filePath(forFile: "Prelude") ?? LispPadPackageResources.preludeURL?.path {
             do {
                 _ = try context.evaluator.machine.eval(file: preludePath)
@@ -373,6 +371,9 @@ public final class Interpreter: ObservableObject, ContextDelegate, @unchecked Se
             }
         }
 
+        self.libManager.replaceLoadedLibraries(with: Array(context.libraries.loaded))
+        self.envManager.replaceBindings(with: context.environment.boundSymbols.map(\.identifier))
+        self.context = context
         self.libManager.scheduleLibraryUpdate()
 
         DispatchQueue.main.sync {
@@ -520,17 +521,21 @@ public final class Interpreter: ObservableObject, ContextDelegate, @unchecked Se
     }
 
     public func loaded(library lib: Library, by _: LispKit.LibraryManager) {
+        guard self.context != nil else {
+            return
+        }
         let proxy = self.libManager.proxy(for: lib)
-        DispatchQueue.main.sync {
+        DispatchQueue.main.async {
             self.libManager.add(proxy: proxy)
         }
     }
 
     public func bound(symbol: Symbol, in _: LispKit.Environment) {
-        let identifier = symbol.identifier
-        DispatchQueue.main.sync {
-            self.envManager.add(identifier: identifier)
+        guard self.context != nil else {
+            return
         }
+        let identifier = symbol.identifier
+        self.envManager.add(identifier: identifier)
     }
 
     public func garbageCollected(objectPool: ManagedObjectPool, time: Double, objectsBefore: Int) {
