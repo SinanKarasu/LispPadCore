@@ -16,7 +16,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/SinanKarasu/swift-lispkit.git", revision: "326a7f813f7d5ab30186a1b03d65c6690ecfe910")
+        .package(url: "https://github.com/SinanKarasu/swift-lispkit.git", from: "1.0.0")
     ],
     targets: [
         .target(
