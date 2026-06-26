@@ -5,9 +5,9 @@ import PackageDescription
 let package = Package(
     name: "LispPadCore",
     platforms: [
-        .iOS(.v17),
-        .macOS(.v14),
-        .visionOS(.v1)
+        .iOS(.v18),
+        .macOS(.v15),
+        .visionOS(.v2)
     ],
     products: [
         .library(
@@ -16,7 +16,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/SinanKarasu/swift-lispkit.git", from: "2.6.2")
+        .package(url: "https://github.com/SinanKarasu/swift-lispkit.git", branch: "codex/lisppad-ios-portability")
     ],
     targets: [
         .target(
