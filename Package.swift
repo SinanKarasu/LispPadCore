@@ -16,7 +16,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/SinanKarasu/swift-lispkit.git", revision: "196fbc5f14c325deccbd460f103a5e2f529319df")
+        .package(url: "https://github.com/SinanKarasu/swift-lispkit.git", branch: "codex/lisppad-platform-floors")
     ],
     targets: [
         .target(
